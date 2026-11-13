@@ -1,0 +1,116 @@
+CREATE TABLE dept_info (
+    DEPTID VARCHAR(10) PRIMARY KEY,
+    DEPTNAME VARCHAR(20),
+    LOCATION VARCHAR(20)
+);
+
+CREATE TABLE salary_info (
+    EMPLOYEE_CATEGORY VARCHAR(1) PRIMARY KEY,
+    BASIC DECIMAL(17,2),
+    TRAVELLING_ALLOWANCE DECIMAL(16,2),
+    DEARNESS_ALLOWANCE DECIMAL(16,2),
+    HOUSE_RENT_ALLOWANCE DECIMAL(16,2),
+    LOCATION_ALLOWANCE DECIMAL(16,2),
+    PROVIDENT_FUND DECIMAL(16,2),
+    MEDICAL_ALLOWANCE DECIMAL(16,2),
+    PROFTAX DECIMAL(6,2),
+    INSURANCE DECIMAL(6,2)
+);
+
+CREATE TABLE allocated_leave_info (
+    EMPLOYEE_CATEGORY VARCHAR(1) PRIMARY KEY,
+    CL DECIMAL(4,0),
+    EL DECIMAL(4,0),
+    ML DECIMAL(4,0)
+);
+
+CREATE TABLE employee_info (
+    EMPID VARCHAR(10) PRIMARY KEY,
+    EMPNAME VARCHAR(20),
+    DEPTID VARCHAR(10),
+    JOINING_DT DATE,
+    DOB DATE,
+    YRS_OF_EXP DECIMAL(10,0),
+    EMPLOYEE_CATEGORY VARCHAR(1),
+    FOREIGN KEY (DEPTID) REFERENCES dept_info(DEPTID),
+    FOREIGN KEY (EMPLOYEE_CATEGORY)
+        REFERENCES salary_info(EMPLOYEE_CATEGORY),
+    FOREIGN KEY (EMPLOYEE_CATEGORY)
+        REFERENCES allocated_leave_info(EMPLOYEE_CATEGORY)
+);
+
+CREATE TABLE emp_leave_info (
+    EMPID VARCHAR(10),
+    FROM_DATE DATE,
+    TO_DATE DATE,
+    TOTAL_LEAVES DECIMAL(4,0),
+    LEAVE_TYPE VARCHAR(5),
+    FOREIGN KEY (EMPID) REFERENCES employee_info(EMPID)
+);
+
+CREATE TABLE emp_payroll (
+    TRANSNO DECIMAL(10,0) PRIMARY KEY,
+    EMPID VARCHAR(10),
+    MONTH VARCHAR(10),
+    YEAR DECIMAL(4,0),
+    TOTAL_EARNING DECIMAL(10,0),
+    NETPAY DECIMAL(10,0),
+    FOREIGN KEY (EMPID) REFERENCES employee_info(EMPID)
+);
+INSERT INTO dept_info VALUES
+('D01', 'IT', 'Kolkata'),
+('D02', 'HR', 'Delhi'),
+('D03', 'Finance', 'Mumbai'),
+('D04', 'Sales', 'Bangalore');
+INSERT INTO salary_info VALUES
+('A', 25000, 2000, 3000, 5000, 1000, 1800, 1000, 200, 300),
+('B', 35000, 3000, 4000, 7000, 1500, 2500, 1500, 300, 400),
+('C', 45000, 4000, 5000, 9000, 2000, 3000, 2000, 400, 500);
+INSERT INTO allocated_leave_info VALUES
+('A', 12, 15, 10),
+('B', 12, 18, 12),
+('C', 15, 20, 15);
+INSERT INTO employee_info VALUES
+('E101', 'Rahul', 'D01', '2005-03-15', '1985-06-10', 8, 'A'),
+('E102', 'Priya', 'D02', '2000-05-20', '1988-02-12', 10, 'B'),
+('E103', 'Amit', 'D01', '2010-07-11', '1990-09-15', 4, 'A'),
+('E104', 'Sneha', 'D03', '2003-01-10', '1987-11-25', 7, 'C'),
+('E105', 'Karan', 'D02', '2002-06-18', '1992-04-05', 3, 'B'),
+('E106', 'Neha', 'D01', '2008-09-22', '1986-08-17', 12, 'A'),
+('E107', 'Rohan', 'D03', '1999-12-15', '1984-03-20', 15, 'C'),
+('E108', 'Anjali', 'D02', '2015-04-01', '1993-07-19', 6, 'B'),
+('E109', 'Vikas', 'D01', '2001-01-01', '1989-10-10', 9, 'A'),
+('E110', 'Meera', 'D03', '2020-08-12', '1995-12-30', 2, 'C');
+INSERT INTO emp_leave_info VALUES
+('E101', '2026-01-01', '2026-01-05', 5, 'CL'),
+('E102', '2026-02-01', '2026-02-12', 12, 'ML'),
+('E103', '2026-03-01', '2026-03-04', 4, 'EL'),
+('E104', '2026-04-01', '2026-04-15', 15, 'CL'),
+('E105', '2026-05-01', '2026-05-08', 8, 'ML'),
+('E106', '2026-06-01', '2026-06-10', 10, 'EL'),
+('E107', '2026-07-01', '2026-07-18', 18, 'ML'),
+('E108', '2026-08-01', '2026-08-06', 6, 'CL'),
+('E109', '2026-09-01', '2026-09-14', 14, 'EL'),
+('E110', '2026-10-01', '2026-10-03', 3, 'CL');
+INSERT INTO emp_payroll VALUES
+(1001, 'E101', 'January', 2026, 38000, 35000),
+(1002, 'E102', 'January', 2026, 52000, 48000),
+(1003, 'E103', 'February', 2026, 38000, 35000),
+(1004, 'E104', 'February', 2026, 65000, 60000),
+(1005, 'E105', 'March', 2026, 52000, 48000),
+(1006, 'E106', 'March', 2026, 38000, 35000),
+(1007, 'E107', 'April', 2026, 65000, 60000),
+(1008, 'E108', 'April', 2026, 52000, 48000),
+(1009, 'E109', 'May', 2026, 38000, 35000),
+(1010, 'E110', 'May', 2026, 65000, 60000);
+select ei.EMPID, ei.EMPNAME, si.BASIC, ep.NETPAY
+from employee_info as ei join salary_info as si
+on ei.EMPLOYEE_CATEGORY = si.EMPLOYEE_CATEGORY
+join emp_payroll as ep
+on ep.EMPID = ei.EMPID
+where si.BASIC > 5000;
+/////// use of group by and having clause
+SELECT EMPID, AVG(NETPAY)
+FROM emp_payroll
+GROUP BY EMPID
+HAVING AVG(NETPAY) > 40000;
